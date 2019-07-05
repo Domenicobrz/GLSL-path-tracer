@@ -53,10 +53,10 @@ void main() {
     // because rays are displaced in terms of a length from their direction
     // so what we're doing is a DOF on a "curved plane" which is wrong obviously
     vec4 rand = uRandomVec4.xyzw;
-    rand.x = mod(rand.x + vUv.x * 100.0 + vUv.y * 100.0, 1.0);
-    rand.y = mod(rand.y + vUv.x * 264.0 + vUv.y * 532.0, 1.0);
-    rand.z = mod(rand.z + vUv.x * 93.0  + vUv.y * 789.0, 1.0);
-    rand.w = mod(rand.w + vUv.x * 155.0 + vUv.y * 221.0, 1.0);
+    // rand.x = mod(rand.x + vUv.x * rand.x * 100.0 + vUv.y * rand.x * 87.0, 1.0);
+    // rand.y = mod(rand.y + vUv.x * rand.y * 100.0 + vUv.y * rand.y * 87.0, 1.0);
+    // rand.z = mod(rand.z + vUv.x * rand.z * 100.0 + vUv.y * rand.z * 87.0, 1.0);
+    // rand.w = mod(rand.w + vUv.x * rand.w * 100.0 + vUv.y * rand.w * 87.0, 1.0);
 
     vec3 focalPoint = ro + rd * 20.0;
     float lambda = rand.x;

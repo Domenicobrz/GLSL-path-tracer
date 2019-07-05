@@ -17,10 +17,14 @@ var canvasSize = 400;
 var radianceBuffer = [];
 var samples = 0;
 var exposure = 30.5;
-var trianglesCount = 100;   
+var trianglesCount = 50;   
 
 
-var yAxisTiles = 10;
+var tileSize = 5000;
+var tilesCount;
+var currentTileIndex = 0;
+var xTilesCount;
+var yTilesCount;
 
 
 var dataTextureSize = 2048;
@@ -116,7 +120,7 @@ function init() {
     postProcScene.add(new THREE.Mesh(postProcQuadGeo, postProcQuadMaterial));
 
 
-
+    tilingSetup();
     render();
 
     console.log("intersections made (in total, all samples) " + intersectionTestsMade);
@@ -125,19 +129,53 @@ function init() {
     console.log("intersections ratio without BVH: " + ((canvasSize*canvasSize*trianglesCount) / (aabbIntersectionTestsMade) )    );
 }  
 
+function tilingSetup() {
+    xTilesCount = Math.floor(canvasWidth / tileSize) + 1;
+    yTilesCount = Math.floor(canvasHeight / tileSize) + 1;
+
+    tilesCount = xTilesCount * yTilesCount;
+}
+
 function render(now) {
     requestAnimationFrame(render);
 
     controls.update();
 
-    // for(let i = 0; i < 5; i++) {
+    let tile_x = currentTileIndex % xTilesCount;
+    let tile_y = Math.floor(currentTileIndex / xTilesCount);
+
+    let px = tile_x * tileSize;
+    let py = tile_y * tileSize;
+    let ex = (tile_x + 1) * tileSize;
+    let ey = (tile_y + 1) * tileSize;
+    if(ex > canvasWidth) ex = canvasWidth;
+    if(ey > canvasHeight) ey = canvasHeight;
+
+    // renderer.setScissorTest(true);
+    // renderer.setScissor(px, py, ex - px, ey - py);
+    // renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+
+    offscreenRT.scissor.set(px, py, ex - px, ey - py);
+    offscreenRT.scissorTest = true;
+
+    
+    if(currentTileIndex === 0) {
+        samples++;    
+        // updating this uniform here ensures all tiles have the same set of random values
         pathTracerMaterial.uniforms.uRandomVec4.value = new THREE.Vector4(Math.random(), Math.random(), Math.random(), Math.random());
+    }
+    // for(let i = 0; i < 5; i++) {
         renderer.setRenderTarget(offscreenRT);
         renderer.render(scene, camera);
-        samples++;    
     // }
 
-    postProcQuadMaterial.uniforms.uSamples.value = samples;
+    // renderer.setScissor(0, 0, canvasWidth, canvasHeight);
+    // renderer.setScissorTest(false);
+
+    currentTileIndex = (++currentTileIndex) % tilesCount;
+
+
+    postProcQuadMaterial.uniforms.uSamples.value = Math.max(samples, 1);
     postProcQuadMaterial.uniforms.uExposure.value = exposure;
     renderer.setRenderTarget(null);
     renderer.render(postProcScene, postProcCamera);
