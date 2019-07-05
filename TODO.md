@@ -1,0 +1,1 @@
+• ray-line intersection tests inside the shader are painfully unoptimized

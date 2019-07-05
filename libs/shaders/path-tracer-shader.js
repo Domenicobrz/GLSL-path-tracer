@@ -29,6 +29,7 @@ uniform sampler2D bvhDataTexture;
 
 ` + shaderpart_calcTriangleNormal + `
 ` + shaderpart_triangleIntersection + `
+` + shaderpart_lineIntersection + `
 ` + shaderpart_aabbIntersection + `
 ` + shaderpart_bvhIntersection + `
 
@@ -53,16 +54,16 @@ void main() {
     // because rays are displaced in terms of a length from their direction
     // so what we're doing is a DOF on a "curved plane" which is wrong obviously
     vec4 rand = uRandomVec4.xyzw;
-    // rand.x = mod(rand.x + vUv.x * rand.x * 100.0 + vUv.y * rand.x * 87.0, 1.0);
-    // rand.y = mod(rand.y + vUv.x * rand.y * 100.0 + vUv.y * rand.y * 87.0, 1.0);
-    // rand.z = mod(rand.z + vUv.x * rand.z * 100.0 + vUv.y * rand.z * 87.0, 1.0);
-    // rand.w = mod(rand.w + vUv.x * rand.w * 100.0 + vUv.y * rand.w * 87.0, 1.0);
+    rand.x = mod(rand.x + vUv.x * rand.x * 100.0 + vUv.y * rand.x * 87.0, 1.0);
+    rand.y = mod(rand.y + vUv.x * rand.y * 100.0 + vUv.y * rand.y * 87.0, 1.0);
+    rand.z = mod(rand.z + vUv.x * rand.z * 100.0 + vUv.y * rand.z * 87.0, 1.0);
+    rand.w = mod(rand.w + vUv.x * rand.w * 100.0 + vUv.y * rand.w * 87.0, 1.0);
 
-    vec3 focalPoint = ro + rd * 20.0;
+    vec3 focalPoint = ro + rd * 10.0;
     float lambda = rand.x;
     float u      = rand.y * 2.0 - 1.0;
     float phi    = rand.z * 6.28;
-    float R      = 0.005;
+    float R      = 1.005;
 
     float x = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * cos(phi);
     float y = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * sin(phi);
@@ -85,7 +86,7 @@ void main() {
     bool intersects = BVHintersect(ro, rd, t, color, normal, stepsTaken, false, false);
 
 
-    vec3 lightPos = vec3(5, 15, 0) + normalize(vec3(x, y, z)) * 0.65;
+    vec3 lightPos = vec3(5, 5, 3) + normalize(vec3(x, y, z)) * 0.65;
 
     if(dot(normal, rd) > 0.0) {
         normal = -normal;

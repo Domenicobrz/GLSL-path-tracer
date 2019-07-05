@@ -137,19 +137,39 @@ bool BVHintersect(vec3 ro, vec3 rd, inout float t, inout vec3 color, inout vec3 
             vec3 v2 = texture2D(trianglesDataTexture, triangleDataPointer + pixelOffset * 2.0).xyz;
 
 
+            // float it = 0.0;
+            // bool intersects = intersectTriangle(
+            //     ro,
+            //     rd,
+            //     v0,
+            //     v1,
+            //     v2,
+            //     it
+            // );
+         
+            // if(intersects && it >= 0.0 && it < mint) {
+            //     color = texture2D(trianglesDataTexture, triangleDataPointer + pixelOffset * 3.0).xyz;
+            //     normal = calcTriangleNormal(v0, v1, v2);
+
+            //     collisionDetected = true;
+            //     mint = it;
+            // }
+
             float it = 0.0;
-            bool intersects = intersectTriangle(
+            vec3 _normal = vec3(0.0);
+            bool intersects = intersectLine(
                 ro,
                 rd,
                 v0,
                 v1,
                 v2,
-                it
+                it,
+                _normal
             );
          
             if(intersects && it >= 0.0 && it < mint) {
                 color = texture2D(trianglesDataTexture, triangleDataPointer + pixelOffset * 3.0).xyz;
-                normal = calcTriangleNormal(v0, v1, v2);
+                normal = _normal;
 
                 collisionDetected = true;
                 mint = it;

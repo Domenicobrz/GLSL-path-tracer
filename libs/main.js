@@ -241,66 +241,71 @@ function createMeshes() {
 // }
    
 {
-    let mult = 3;
-    let z = 20;
+    // let mult = 3;
+    // let z = 20;
 
-    let lx1 = 0   * mult;
-    let ly1 = 5   * mult;
-    let lz1 = z;
+    // let lx1 = 0   * mult;
+    // let ly1 = 5   * mult;
+    // let lz1 = z;
 
-    let lx2 = -5   * mult; 
-    let ly2 = -3   * mult;
-    let lz2 = z;
+    // let lx2 = -5   * mult; 
+    // let ly2 = -3   * mult;
+    // let lz2 = z;
 
-    let lx3 = 5   * mult; 
-    let ly3 = -3   * mult;
-    let lz3 = z;
+    // let lx3 = 5   * mult; 
+    // let ly3 = -3   * mult;
+    // let lz3 = z;
 
-    let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    object.setColor(1,1,1);        
-    objects.push(object);
+
+    // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+    // object.setColor(1,1,1);        
+    // objects.push(object);
+
+
+    // let mult = 1;
+    // let z = 5;
+
+    // let lx1 = 0;
+    // let ly1 = -2;
+    // let lz1 = 8;
+
+    // let lx2 = 0; 
+    // let ly2 = 2;
+    // let lz2 = 8;
+
+    // let r = 1.6;
+    // let lx3 = r; 
+    // let ly3 = r;
+    // let lz3 = r;
+
+    // let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
+    // object.setColor(1,1,1);        
+    // objects.push(object);
+
+
+
 }
    
 
     for(let j = 0; j < trianglesCount; j++) {
 
-        // let lx1 = Utils.rand() * 15 - 15 * 0.5; 
-        // let ly1 = Utils.rand() * 15 - 15 * 0.5;
-        // let lz1 = Utils.rand() * 0.2 + 5 + j * 0.04;
-    
-        // let lx2 = lx1 + Utils.rand() * 1; 
-        // let ly2 = ly1 + Utils.rand() * 1;
-        // let lz2 = lz1 + Utils.rand() * 1;
-
-        // let lx3 = lx1 + Utils.rand() * 1; 
-        // let ly3 = ly1 + Utils.rand() * 1;
-        // let lz3 = lz1 + Utils.rand() * 1;
-        
         let lx1 = Utils.rand() * 15 - 15 * 0.5; 
         let ly1 = Utils.rand() * 15 - 15 * 0.5;
-        let lz1 = 4;
-    
+        let lz1 = 4 + Utils.rand() * 10.0;
 
-        let r = 16;
-
-        // let lx2 = lx1 - 0.6; 
-        // let ly2 = ly1 - 0.9;
-        // let lz2 = lz1 - r;
-
-        // let lx3 = lx1 + 0.6; 
-        // let ly3 = ly1 - 0.9;
-        // let lz3 = lz1 + r;
-
+        let r = 0.05;
+        let z = Utils.rand();
         
         let lx2 = lx1 + (Utils.rand() * 2 - 1) * 0.5;
         let ly2 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
-        let lz2 = lz1 + r;
+        let lz2 = lz1 + z;
 
         let lx3 = lx1 + (Utils.rand() * 2 - 1) * 0.5; 
         let ly3 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
-        let lz3 = lz1 + r;
+        let lz3 = lz1 + z;
 
-        let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+        // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+        let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, r);
         // object.setColor(1, 0.4, 0.15);
         // if(Math.random() > 0.5) {
         //     let grayValue = Math.pow(Math.random(), 1.0);
@@ -309,6 +314,7 @@ function createMeshes() {
         // }
         let res = Utils.hslToRgb(Utils.rand() * 1 + 0, 1, 0.7);
         object.setColor(res[0], res[1], res[2]);        
+        object.setColor(1,1,1);        
 
         objects.push(object);
     }
@@ -921,5 +927,37 @@ class Triangle {
         return {
             t: t
         }; // this ray hits the triangle 
+    }
+}
+
+class Line {
+    constructor(lx1, ly1, lz1, lx2, ly2, lz2, r) {
+        this.aabb = new AABB();
+        
+        this.v0 = new THREE.Vector3(lx1, ly1, lz1);
+        this.v1 = new THREE.Vector3(lx2, ly2, lz2);
+        this.v2 = new THREE.Vector3(r, r, r);
+
+        let m = 1;
+        this.aabb.addVertex(new THREE.Vector3(lx1 - r * m, ly1 - r * m, lz1 - r * m));
+        this.aabb.addVertex(new THREE.Vector3(lx1 + r * m, ly1 + r * m, lz1 + r * m));
+        this.aabb.addVertex(new THREE.Vector3(lx2 - r * m, ly2 - r * m, lz2 - r * m));
+        this.aabb.addVertex(new THREE.Vector3(lx2 + r * m, ly2 + r * m, lz2 + r * m));
+        // this.aabb.addVertex(this.v2);
+        
+        this.center = new THREE.Vector3(
+            (lx1 + lx2) / 3,
+            (ly1 + ly2) / 3,
+            (lz1 + lz2) / 3,
+        );
+
+        this.textureDataIndexX = -1;
+        this.textureDataIndexY = -1;
+    
+        this.color = new THREE.Vector3(1,1,1);
+    }
+
+    setColor(r,g,b) {
+        this.color = new THREE.Vector3(r,g,b);
     }
 }
