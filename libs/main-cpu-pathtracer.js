@@ -8,10 +8,10 @@ var canvas;
 
 var context;
 var imageDataObject;
-var canvasSize = 800;
+var canvasSize = 1200;
 var radianceBuffer = [];
 var samples = 0;
-var trianglesCount = 30;
+var trianglesCount = 150;
 
 function init() {    
     // renderer = new THREE.WebGLRenderer( {  } );
@@ -68,7 +68,7 @@ function render(now) {
 
     // renderer.render(scene, camera);
 
-
+    let dt = Date.now();
     for(let i = 0; i < canvasSize; i++) {
         for(let j = 0; j < canvasSize; j++) {
             raytrace(i, j);
@@ -89,7 +89,7 @@ function render(now) {
     }
 
     context.putImageData(imageDataObject, 0, 0);
-
+    console.log(Date.now() - dt);
 }
 
 
@@ -154,51 +154,51 @@ function createMeshes() {
 
 
 
-    let lx1 = 0;
-    let ly1 = 1;
-    let lz1 = 10;
+    // let lx1 = 0;
+    // let ly1 = 1;
+    // let lz1 = 10;
 
-    let lx2 = -0.5; 
-    let ly2 = 0;
-    let lz2 = 7;
+    // let lx2 = -0.5; 
+    // let ly2 = 0;
+    // let lz2 = 7;
 
-    let lx3 = 0.5; 
-    let ly3 = 0;
-    let lz3 = 13;
-
-
-    let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    objects.push(object);
+    // let lx3 = 0.5; 
+    // let ly3 = 0;
+    // let lz3 = 13;
 
 
+    // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+    // objects.push(object);
 
-    // for(let j = 0; j < trianglesCount; j++) {
 
-    //     let lx1 = Math.random() * 15 - 15 * 0.5; 
-    //     let ly1 = Math.random() * 15 - 15 * 0.5;
-    //     let lz1 = Math.random() * 15 + 5;
+
+    for(let j = 0; j < trianglesCount; j++) {
+
+        let lx1 = Math.random() * 15 - 15 * 0.5; 
+        let ly1 = Math.random() * 15 - 15 * 0.5;
+        let lz1 = Math.random() * 15 + 5;
     
-    //     let lx2 = lx1 + Math.random() * 1; 
-    //     let ly2 = ly1 + Math.random() * 1;
-    //     let lz2 = lz1 + Math.random() * 1;
+        let lx2 = lx1 + Math.random() * 1; 
+        let ly2 = ly1 + Math.random() * 1;
+        let lz2 = lz1 + Math.random() * 1;
 
-    //     let lx3 = lx1 + Math.random() * 1; 
-    //     let ly3 = ly1 + Math.random() * 1;
-    //     let lz3 = lz1 + Math.random() * 1;
-
-
-    //     let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    //     objects.push(object);
+        let lx3 = lx1 + Math.random() * 1; 
+        let ly3 = ly1 + Math.random() * 1;
+        let lz3 = lz1 + Math.random() * 1;
 
 
-    //     position.push(lx1, ly1, lz1);
-    //     position.push(lx2, ly2, lz2);
-    //     position.push(lx3, ly3, lz3);
+        let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+        objects.push(object);
 
-    //     color.push(1,1,1);    
-    //     color.push(1,1,1);    
-    //     color.push(1,1,1);    
-    // }
+
+        position.push(lx1, ly1, lz1);
+        position.push(lx2, ly2, lz2);
+        position.push(lx3, ly3, lz3);
+
+        color.push(1,1,1);    
+        color.push(1,1,1);    
+        color.push(1,1,1);    
+    }
  
     geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(position), 3 ) );
     geometry.addAttribute( 'color',    new THREE.BufferAttribute( new Float32Array(color), 3 ) );
@@ -526,7 +526,7 @@ class Triangle {
 
 
 
-        QUESTA FUNZIONE E' SBAGLIATA E VA RISCRITTA
+        // QUESTA FUNZIONE E' SBAGLIATA E VA RISCRITTA
 
 
 

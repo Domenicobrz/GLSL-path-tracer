@@ -16,8 +16,11 @@ var imageDataObject;
 var canvasSize = 400;
 var radianceBuffer = [];
 var samples = 0;
-var exposure = 0.1;
-var trianglesCount = 500;   
+var exposure = 30.5;
+var trianglesCount = 100;   
+
+
+var yAxisTiles = 10;
 
 
 var dataTextureSize = 2048;
@@ -25,12 +28,18 @@ var trianglesTexture;
 var bvhTexture;
 
 
+
+var canvasWidth = 1200;
+var canvasHeight = 800;
+
+
+
 function init() {    
     canvas = document.createElement("canvas");
     var context = canvas.getContext( 'webgl2' );
     renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
     renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( innerWidth, innerHeight );
+    renderer.setSize(canvasWidth, canvasHeight );
     renderer.autoClear = false;
     document.body.appendChild(renderer.domElement);
 
@@ -38,10 +47,10 @@ function init() {
     scene.background = null;
     postProcScene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera( 45, innerWidth / innerHeight, 2, 200 );
+    camera = new THREE.PerspectiveCamera( 45, canvasWidth / canvasHeight, 2, 200 );
     camera.position.set(0, 0, 20);
 
-    postProcCamera = new THREE.PerspectiveCamera( 20, innerWidth / innerHeight, 2, 200 );
+    postProcCamera = new THREE.PerspectiveCamera( 20, canvasWidth / canvasHeight, 2, 200 );
     postProcCamera.position.set(0, 0, 10);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -59,7 +68,7 @@ function init() {
         uniforms: {
             trianglesDataTexture: { type: "t", value: trianglesTexture },
             bvhDataTexture:       { type: "t", value: bvhTexture },
-            uScreenSize:          { value: new THREE.Vector2(innerWidth, innerHeight) },
+            uScreenSize:          { value: new THREE.Vector2(canvasWidth, canvasHeight) },
             uDataTextureSize:     { value: dataTextureSize },
             uRandomVec4:          { value: new THREE.Vector4(0,0,0,0) },
         },
@@ -86,7 +95,7 @@ function init() {
 
 
     
-    offscreenRT = new THREE.WebGLRenderTarget(innerWidth, innerHeight, {
+    offscreenRT = new THREE.WebGLRenderTarget(canvasWidth, canvasHeight, {
         stencilBuffer: false,
         depthBuffer: false,
         type: THREE.FloatType,
@@ -175,23 +184,45 @@ function createMeshes() {
     // }
 
     
+// {
+//     let lx1 = 0;
+//     let ly1 = 1;
+//     let lz1 = 5;
 
-    // let lx1 = 0;
-    // let ly1 = 1;
-    // let lz1 = 7.5;
+//     let lx2 = -0.5; 
+//     let ly2 = 0;
+//     let lz2 = 5;
 
-    // let lx2 = 0.05; 
-    // let ly2 = 0;
-    // let lz2 = 5;
+//     let lx3 = 0.5; 
+//     let ly3 = 0;
+//     let lz3 = 5;
 
-    // let lx3 = -0.05; 
-    // let ly3 = 0;
-    // let lz3 = 10;
+//     let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+//     object.setColor(1,1,1);        
+//     objects.push(object);
+// }
+   
+{
+    let mult = 3;
+    let z = 20;
 
-    // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    // objects.push(object);
+    let lx1 = 0   * mult;
+    let ly1 = 5   * mult;
+    let lz1 = z;
 
+    let lx2 = -5   * mult; 
+    let ly2 = -3   * mult;
+    let lz2 = z;
 
+    let lx3 = 5   * mult; 
+    let ly3 = -3   * mult;
+    let lz3 = z;
+
+    let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
+    object.setColor(1,1,1);        
+    objects.push(object);
+}
+   
 
     for(let j = 0; j < trianglesCount; j++) {
 
@@ -207,17 +238,29 @@ function createMeshes() {
         // let ly3 = ly1 + Utils.rand() * 1;
         // let lz3 = lz1 + Utils.rand() * 1;
         
-        let lx1 = Math.random() * 15 - 15 * 0.5; 
-        let ly1 = Math.random() * 15 - 15 * 0.5;
-        let lz1 = Math.random() * 0.2 + 5 + j * 0.04;
+        let lx1 = Utils.rand() * 15 - 15 * 0.5; 
+        let ly1 = Utils.rand() * 15 - 15 * 0.5;
+        let lz1 = 4;
     
-        let lx2 = lx1 - 0.16; 
-        let ly2 = ly1 - 0.2;
-        let lz2 = lz1 - 4;
 
-        let lx3 = lx1 + 0.16; 
-        let ly3 = ly1 - 0.2;
-        let lz3 = lz1 + 4;
+        let r = 16;
+
+        // let lx2 = lx1 - 0.6; 
+        // let ly2 = ly1 - 0.9;
+        // let lz2 = lz1 - r;
+
+        // let lx3 = lx1 + 0.6; 
+        // let ly3 = ly1 - 0.9;
+        // let lz3 = lz1 + r;
+
+        
+        let lx2 = lx1 + (Utils.rand() * 2 - 1) * 0.5;
+        let ly2 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
+        let lz2 = lz1 + r;
+
+        let lx3 = lx1 + (Utils.rand() * 2 - 1) * 0.5; 
+        let ly3 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
+        let lz3 = lz1 + r;
 
         let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
         // object.setColor(1, 0.4, 0.15);
@@ -226,7 +269,7 @@ function createMeshes() {
         //     // object.setColor(0, grayValue * 0.3, grayValue);        
         //     object.setColor(0.15, 0.4, 1);        
         // }
-        let res = Utils.hslToRgb(Math.random() * 0.3 + 0.7, 1, 0.7);
+        let res = Utils.hslToRgb(Utils.rand() * 1 + 0, 1, 0.7);
         object.setColor(res[0], res[1], res[2]);        
 
         objects.push(object);

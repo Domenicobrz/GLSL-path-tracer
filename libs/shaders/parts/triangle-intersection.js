@@ -1,6 +1,6 @@
 let shaderpart_triangleIntersection = `
 
-float intersectTriangle(vec3 ro, vec3 rd, vec3 v0, vec3 v1, vec3 v2) {
+bool intersectTriangle(vec3 ro, vec3 rd, vec3 v0, vec3 v1, vec3 v2, inout float t) {
     
     float kEpsilon = 0.0001;
 
@@ -106,23 +106,23 @@ float intersectTriangle(vec3 ro, vec3 rd, vec3 v0, vec3 v1, vec3 v2) {
 // #ifdef CULLING 
 //     // if the determinant is negative the triangle is backfacing
 //     // if the determinant is close to 0, the ray misses the triangle
-//     if (det < kEpsilon) return -1.0; 
+//     if (det < kEpsilon) return false; 
 // #else 
     // ray and triangle are parallel if det is close to 0
-    if (abs(det) < kEpsilon) return -1.0; 
+    if (abs(det) < kEpsilon) return false; 
 // #endif 
     float invDet = 1.0 / det; 
  
     vec3 tvec = ro - v0; 
     float u = dot(tvec, pvec) * invDet; 
-    if (u < 0.0 || u > 1.0) return -1.0; 
+    if (u < 0.0 || u > 1.0) return false; 
  
     vec3 qvec = cross(tvec, v0v1); 
     float v = dot(rd, qvec) * invDet; 
-    if (v < 0.0 || u + v > 1.0) return -1.0; 
+    if (v < 0.0 || u + v > 1.0) return false; 
  
-    float t = dot(v0v2, qvec) * invDet; 
+    t = dot(v0v2, qvec) * invDet; 
  
-    return t; 
+    return true; 
 }
 `;

@@ -37,6 +37,9 @@ void main() {
         1.0
     );
 
+    if(color.x < 0.0) color.x = 0.0;
+    if(color.y < 0.0) color.y = 0.0;
+    if(color.z < 0.0) color.z = 0.0;
     
 
     const float gamma = 1.0; //2.2;
