@@ -17,7 +17,7 @@ var canvasSize = 400;
 var radianceBuffer = [];
 var samples = 0;
 var exposure = 30.5;
-var trianglesCount = 50;   
+var trianglesCount = 450;   
 
 
 var tileSize = 5000;
@@ -75,6 +75,7 @@ function init() {
             uScreenSize:          { value: new THREE.Vector2(canvasWidth, canvasHeight) },
             uDataTextureSize:     { value: dataTextureSize },
             uRandomVec4:          { value: new THREE.Vector4(0,0,0,0) },
+            uTime:                { value: 0 },
         },
         side: THREE.DoubleSide,
         vertexShader: pathtracerv,
@@ -163,6 +164,7 @@ function render(now) {
         samples++;    
         // updating this uniform here ensures all tiles have the same set of random values
         pathTracerMaterial.uniforms.uRandomVec4.value = new THREE.Vector4(Math.random(), Math.random(), Math.random(), Math.random());
+        pathTracerMaterial.uniforms.uTime.value = now;
     }
     // for(let i = 0; i < 5; i++) {
         renderer.setRenderTarget(offscreenRT);
@@ -240,61 +242,95 @@ function createMeshes() {
 //     objects.push(object);
 // }
    
-{
-    // let mult = 3;
-    // let z = 20;
+// {
 
-    // let lx1 = 0   * mult;
-    // let ly1 = 5   * mult;
-    // let lz1 = z;
+//     let lx1 = 0;
+//     let ly1 = -2;
+//     let lz1 = 8;
 
-    // let lx2 = -5   * mult; 
-    // let ly2 = -3   * mult;
-    // let lz2 = z;
+//     let lx2 = 0; 
+//     let ly2 = 2;
+//     let lz2 = 8;
 
-    // let lx3 = 5   * mult; 
-    // let ly3 = -3   * mult;
-    // let lz3 = z;
+//     let r = 0.2;
+//     let lx3 = r; 
 
+//     let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
+//     object.setColor(1,1,1);        
+//     objects.push(object);
+// }
 
-    // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    // object.setColor(1,1,1);        
-    // objects.push(object);
+// {
 
+//     let ly1 = -2;
+//     let lx1 = 0;
+//     let lz1 = 8.5;
 
-    // let mult = 1;
-    // let z = 5;
+//     let ly2 = 2; 
+//     let lx2 = 0;
+//     let lz2 = 8.5;
 
-    // let lx1 = 0;
-    // let ly1 = -2;
-    // let lz1 = 8;
+//     let r = 0.2;
+//     let lx3 = r; 
 
-    // let lx2 = 0; 
-    // let ly2 = 2;
-    // let lz2 = 8;
-
-    // let r = 1.6;
-    // let lx3 = r; 
-    // let ly3 = r;
-    // let lz3 = r;
-
-    // let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
-    // object.setColor(1,1,1);        
-    // objects.push(object);
-
-
-
-}
+//     let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
+//     object.setColor(0.2, 0.5, 1);        
+//     objects.push(object);
+// }
    
+
+
+
+
+    // for(let j = 0; j < 5; j++) {
+    //     for(let i = 0; i < 300; i++) {
+    //         let a11 = (i / 300)     * Math.PI * 14;
+    //         let a12 = (i / 300)     * Math.PI * 2 + j * 0.1;
+    //         let a21 = ((i+1) / 300) * Math.PI * 14;
+    //         let a22 = ((i+1) / 300) * Math.PI * 2 + j * 0.1;
+
+    //         let r1 = 0; //Math.sin(i / 300 * Math.PI * 8)     * 0.8;
+    //         let r2 = 0; //Math.sin((i+1) / 300 * Math.PI * 8) * 0.8;
+
+    //         let v1 = new THREE.Vector3(0, 1 + r1, 0);
+    //         v1.applyAxisAngle(new THREE.Vector3(0,0,1), a11);
+    //         v1.add(new THREE.Vector3(-5,0,0));
+    //         v1.applyAxisAngle(new THREE.Vector3(0,1,0), a12);
+    //         v1.applyAxisAngle(new THREE.Vector3(1,0,0), -0.35);
+    //         v1.add(new THREE.Vector3(0,0, 8));
+
+
+    //         let v2 = new THREE.Vector3(0, 1 + r2, 0);
+    //         v2.applyAxisAngle(new THREE.Vector3(0,0,1), a21);
+    //         v2.add(new THREE.Vector3(-5,0,0));
+    //         v2.applyAxisAngle(new THREE.Vector3(0,1,0), a22);
+    //         v2.applyAxisAngle(new THREE.Vector3(1,0,0), -0.35);
+    //         v2.add(new THREE.Vector3(0,0, 8));
+
+    //         // let r = 0.03 + Math.sin(j * 0.3) * 0.15;
+    //         let r = 0.05;
+
+    //         let object  = new Line(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, r);
+    //         if(j === 3)
+    //             object.setColor(0.2 * 1, 0.5 * 1, 1 * 1);     
+
+    //         objects.push(object);
+    //     }
+    // }
+
+
+
 
     for(let j = 0; j < trianglesCount; j++) {
 
-        let lx1 = Utils.rand() * 15 - 15 * 0.5; 
-        let ly1 = Utils.rand() * 15 - 15 * 0.5;
-        let lz1 = 4 + Utils.rand() * 10.0;
+
+
+        let lx1 = Utils.rand() * 5 - 5 * 0.5; 
+        let ly1 = Utils.rand() * 5 - 5 * 0.5;
+        let lz1 = 10 + (Utils.rand() * 2.0 - 1.0) * 1.0;
 
         let r = 0.05;
-        let z = Utils.rand();
+        let z = Utils.rand() * 8;
         
         let lx2 = lx1 + (Utils.rand() * 2 - 1) * 0.5;
         let ly2 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
@@ -307,16 +343,37 @@ function createMeshes() {
         // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
         let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, r);
         // object.setColor(1, 0.4, 0.15);
-        // if(Math.random() > 0.5) {
-        //     let grayValue = Math.pow(Math.random(), 1.0);
-        //     // object.setColor(0, grayValue * 0.3, grayValue);        
-        //     object.setColor(0.15, 0.4, 1);        
-        // }
+        
         let res = Utils.hslToRgb(Utils.rand() * 1 + 0, 1, 0.7);
         object.setColor(res[0], res[1], res[2]);        
-        object.setColor(1,1,1);        
+        object.setColor(2.5,2.5,2.5);        
 
-        objects.push(object);
+        if(Utils.rand() > 0.5) {
+            let grayValue = Math.pow(Math.random(), 1.0);
+            // object.setColor(0, grayValue * 0.3, grayValue);        
+            object.setColor(0.15 * 2, 0.4 * 2, 1 * 2);        
+        }
+
+
+
+    //     if(
+    //         // (j < 200 || j > 380) || 
+    //         (j == 12) ||
+    //         (j == 57)
+    //     ) {
+
+    //         if(j == 12) {
+    //             object.v0.x = object.v0.x;
+    //             object.v0.y = object.v0.y;
+    //             object.v0.z = object.v0.z;
+    //         }
+    //         if(j == 57) {
+    //             object.v0.x = object.v0.x;
+    //             object.v0.y = object.v0.y;
+    //             object.v0.z = object.v0.z;
+    //         }
+            objects.push(object);
+    //     }
     }
  
     // geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(position), 3 ) );

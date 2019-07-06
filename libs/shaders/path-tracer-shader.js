@@ -21,6 +21,7 @@ varying vec2 vUv;
 uniform vec4 uRandomVec4;
 uniform vec2 uScreenSize;
 uniform float uDataTextureSize;
+uniform float uTime;
 
 uniform sampler2D trianglesDataTexture;
 uniform sampler2D bvhDataTexture;
@@ -36,6 +37,24 @@ uniform sampler2D bvhDataTexture;
 
 
 
+//  the function below is hash12 from https://www.shadertoy.com/view/4djSRW - I just renamed it nrand()
+//  sin based random functions wont work
+float nrand(vec2 p)
+{
+	vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+float n1rand( vec2 n )
+{
+	float t = fract( uTime );
+	float nrnd0 = nrand( n + 0.7*t );
+	return nrnd0;
+}
+
+
+
+
 
 void main() {
     vec2 uvSampleOffset = vec2((1.0 / uScreenSize.x) * uRandomVec4.x, (1.0 / uScreenSize.y) * uRandomVec4.y); 
@@ -44,7 +63,7 @@ void main() {
 
 
     vec3 ro = vec3(0, 0, 0);
-    vec3 rd = normalize(vec3(ndcUV, 1.0));
+    vec3 rd = normalize(vec3(ndcUV * 0.3, 1.0));
 
 
 
@@ -54,20 +73,34 @@ void main() {
     // because rays are displaced in terms of a length from their direction
     // so what we're doing is a DOF on a "curved plane" which is wrong obviously
     vec4 rand = uRandomVec4.xyzw;
-    rand.x = mod(rand.x + vUv.x * rand.x * 100.0 + vUv.y * rand.x * 87.0, 1.0);
-    rand.y = mod(rand.y + vUv.x * rand.y * 100.0 + vUv.y * rand.y * 87.0, 1.0);
-    rand.z = mod(rand.z + vUv.x * rand.z * 100.0 + vUv.y * rand.z * 87.0, 1.0);
-    rand.w = mod(rand.w + vUv.x * rand.w * 100.0 + vUv.y * rand.w * 87.0, 1.0);
+    rand.x = n1rand( vec2(uRandomVec4.x + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
+    rand.y = n1rand( vec2(uRandomVec4.y + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
+    rand.z = n1rand( vec2(uRandomVec4.z + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
+    rand.w = n1rand( vec2(uRandomVec4.w + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
 
-    vec3 focalPoint = ro + rd * 10.0;
+    vec3 focalPoint = ro + (
+        (rd * (1.0 / dot(rd, vec3(0,0,1.0)))   )
+     * 9.5);
+
     float lambda = rand.x;
     float u      = rand.y * 2.0 - 1.0;
     float phi    = rand.z * 6.28;
-    float R      = 1.005;
+    float R      = 0.35;
 
     float x = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * cos(phi);
     float y = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * sin(phi);
     float z = R * pow(lambda, 0.33333) * u;
+
+
+    {
+        float a = rand.x * 2.0 * 3.141592;
+        float r = R * sqrt(rand.y);
+
+        // If you need it in Cartesian coordinates
+        x = r * cos(a);
+        y = r * sin(a);
+    }
+
 
     ro += vec3(x, y, 0.0);
 
@@ -79,74 +112,65 @@ void main() {
 
 
 
-    float stepsTaken = 0.0;
-    float t     = 0.0;
-    vec3 color  = vec3(0.0);
-    vec3 normal = vec3(0.0);
-    bool intersects = BVHintersect(ro, rd, t, color, normal, stepsTaken, false, false);
 
 
-    vec3 lightPos = vec3(5, 5, 3) + normalize(vec3(x, y, z)) * 0.65;
+    vec4 seed = vec4(34.5, 249.0, 201.0, 177.0);
 
-    if(dot(normal, rd) > 0.0) {
-        normal = -normal;
-    }
+    vec3 mask = vec3(1.0);
+    vec3 accucolor = vec3(0.0);
+    bool stop = false;
+    for(int i = 0; i < 4; i++) {
+        float stepsTaken = 0.0;
+        float t = 0.0;
+        vec3 color  = vec3(0.0);
+        vec3 normal = vec3(0.0);
+        bool intersects = BVHintersect(ro, rd, t, color, normal, stepsTaken, false, stop);  
 
-    ro = ro + rd * (t - 0.01);
-    rd = normalize(lightPos - ro);
+        if(intersects) {
 
-    float diffuse = max(dot(normal, rd), 0.0);
+            ro = ro + rd * (t - 0.001);
+
+            seed.x += 19.0;
+            seed.y += 15.0;
+            seed.z += 41.0;
+            seed.w += 22.0;
 
 
+            // ******************** random on unit sphere
+            vec4 rand = uRandomVec4.xyzw;
+            rand.x = n1rand( vec2(uRandomVec4.z + seed.x, uRandomVec4.x) );
+            rand.y = n1rand( vec2(uRandomVec4.y + seed.y, uRandomVec4.y) );
+            rand.z = n1rand( vec2(uRandomVec4.w + seed.z, uRandomVec4.z) );
+            rand.w = n1rand( vec2(uRandomVec4.x + seed.w, uRandomVec4.w) );
+            
+            float lambda = rand.x;
+            float u      = rand.y * 2.0 - 1.0;
+            float phi    = rand.z * 6.28;
+            float R      = 1.0;
+            
+            float x = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * cos(phi);
+            float y = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * sin(phi);
+            float z = R * pow(lambda, 0.33333) * u;
 
-    out_FragColor = vec4(0,0,0, 1);
-    if(intersects) {
-        vec3 c = vec3(0.0), n = vec3(0.0);
-        // shadow ray
-        bool shadowIntersects = BVHintersect(ro, rd, t, c, n, stepsTaken, true, !intersects);
+            vec3 hpn = ro + normal;
+            vec3 randomOnUnitSphere = vec3(x,y,z);
+            // ******************** random on unit sphere - END
 
-        if(!shadowIntersects) {
-            out_FragColor = vec4(color * vec3(diffuse) * 100.0, 1);
+            rd = normalize((hpn + randomOnUnitSphere) - ro);
+            mask *= color * dot(normal, rd);
+
+        } else {
+
+            if(i > 0) accucolor = vec3(
+                pow(max(dot(rd, normalize(vec3(9.0, 1.0, 0.0))), 0.0), 16.0)
+            ) * 1000.0;
+
+            stop = true;
+            break;
         }
     }
-   
-   
-    // out_FragColor = vec4(c, 1);
-    // return;
-   
 
 
+    out_FragColor = vec4(accucolor * mask, 1.0);
 
-
-
-
-
-
-
-
-
-    // if(stepsTaken > 200.0) {
-    //     out_FragColor = vec4(0, 100, 0, 1);
-    // } else {
-    //     out_FragColor = vec4(100, 0, 0, 1);
-    // }
-
-    // return;     
-
-
-
-    
-    // out_FragColor = vec4(0, 0, 0, 1);
-    
-    // if (intersects) { // if we've hit an object and we're not in shadow..
-    //     out_FragColor = vec4(color * vec3(diffuse) * 100.0, 1);
-    // }
-
-    // // // runs if this point should be in shadow
-    // // if(intersects && shadowIntersects) {
-    // //     out_FragColor = vec4(0, 0, 0, 1);
-    // // } 
-
-
-    // // out_FragColor = vec4(0, 0, 0, 1);
 }`;
