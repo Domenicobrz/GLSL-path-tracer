@@ -1,5 +1,5 @@
 # GLSL-path-tracer
-A simple glsl path tracer whose only primitives are.. capsules
+A simple glsl path tracer with a kd-tree BVH whose only primitives are.. capsules
 
 <img src="https://raw.githubusercontent.com/Domenicobrz/GLSL-path-tracer/master/screenshot.jpg?token=AGDVV3RLSLV2SII4W5JZK525EFFYO" width="100%">
 
