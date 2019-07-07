@@ -9,7 +9,7 @@ How to use
 Inside `libs/createMeshes.js` you can code the scene you want to render, guess what, only capsules are supported, here's an example on how to create a scene:
 
 ```javascript
-function createLines(objects) {
+function createMeshes(objects) {
     for(let j = 0; j < 450; j++) {
 
         let lx1 = Utils.rand() * 5 - 5 * 0.5; 
