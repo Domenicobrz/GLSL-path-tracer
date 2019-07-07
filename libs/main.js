@@ -16,26 +16,14 @@ var imageDataObject;
 var canvasSize = 400;
 var radianceBuffer = [];
 var samples = 0;
-var exposure = 30.5;
-var trianglesCount = 450;   
 
-
-var tileSize = 5000;
 var tilesCount;
 var currentTileIndex = 0;
 var xTilesCount;
 var yTilesCount;
 
-
-var dataTextureSize = 2048;
 var trianglesTexture;
 var bvhTexture;
-
-
-
-var canvasWidth = 1200;
-var canvasHeight = 800;
-
 
 
 function init() {    
@@ -65,7 +53,7 @@ function init() {
     // controls.maxPolarAngle   = Math.PI - 0.85; 
 
 
-    createMeshes();
+    createMeshesWrapper();
 
     let pathTracerQuad = new THREE.PlaneBufferGeometry(2,2);
     pathTracerMaterial = new THREE.ShaderMaterial({
@@ -76,6 +64,7 @@ function init() {
             uDataTextureSize:     { value: dataTextureSize },
             uRandomVec4:          { value: new THREE.Vector4(0,0,0,0) },
             uTime:                { value: 0 },
+            uBokehParams:         { value: new THREE.Vector4(bokehStrength, focalDistance, 0, 0) },
         },
         side: THREE.DoubleSide,
         vertexShader: pathtracerv,
@@ -123,11 +112,6 @@ function init() {
 
     tilingSetup();
     render();
-
-    console.log("intersections made (in total, all samples) " + intersectionTestsMade);
-    console.log("aabb intersections made (in total, all samples) " + aabbIntersectionTestsMade);
-    console.log("intersections per pixel: " + (aabbIntersectionTestsMade / (canvasSize*canvasSize)));
-    console.log("intersections ratio without BVH: " + ((canvasSize*canvasSize*trianglesCount) / (aabbIntersectionTestsMade) )    );
 }  
 
 function tilingSetup() {
@@ -185,245 +169,19 @@ function render(now) {
 
 
 
-function createMeshes() {
-    // var geometry  = new THREE.BufferGeometry();
-    // var position = [];
-    // var color    = [];
-
+function createMeshesWrapper() {
     let objects  = [];
 
-    // for(let i = -1; i <= 1; i++) {
-    //     for(let j = -1; j <= 1; j++) {
-    //         // let lx1 = i * 2;
-    //         // let ly1 = j * 2 + 1;
-    //         // let lz1 = 11 + i;
-            
-    //         // let lx2 = i * 2 - 0.5; 
-    //         // let ly2 = j * 2;
-    //         // let lz2 = 11 + i;
-        
-    //         // let lx3 = i * 2 + 0.5; 
-    //         // let ly3 = j * 2;
-    //         // let lz3 = 11 + i;
-
-    //         let lx1 = Utils.rand() * 20 - 10;
-    //         let ly1 = Utils.rand() * 20 - 10;
-    //         let lz1 = 12;
-            
-    //         let lx2 = lx1 - 1;
-    //         let ly2 = ly1 - 1;
-    //         let lz2 = lz1 - 0.5;
-        
-    //         let lx3 = lx1 + 1; 
-    //         let ly3 = ly1 - 1;
-    //         let lz3 = lz1 + 0.5;
-        
-    //         let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-    //         objects.push(object);
-    //     }
-    // }
-
-    
-// {
-//     let lx1 = 0;
-//     let ly1 = 1;
-//     let lz1 = 5;
-
-//     let lx2 = -0.5; 
-//     let ly2 = 0;
-//     let lz2 = 5;
-
-//     let lx3 = 0.5; 
-//     let ly3 = 0;
-//     let lz3 = 5;
-
-//     let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-//     object.setColor(1,1,1);        
-//     objects.push(object);
-// }
-   
-// {
-
-//     let lx1 = 0;
-//     let ly1 = -2;
-//     let lz1 = 8;
-
-//     let lx2 = 0; 
-//     let ly2 = 2;
-//     let lz2 = 8;
-
-//     let r = 0.2;
-//     let lx3 = r; 
-
-//     let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
-//     object.setColor(1,1,1);        
-//     objects.push(object);
-// }
-
-// {
-
-//     let ly1 = -2;
-//     let lx1 = 0;
-//     let lz1 = 8.5;
-
-//     let ly2 = 2; 
-//     let lx2 = 0;
-//     let lz2 = 8.5;
-
-//     let r = 0.2;
-//     let lx3 = r; 
-
-//     let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, lx3);
-//     object.setColor(0.2, 0.5, 1);        
-//     objects.push(object);
-// }
-   
-
-
-
-
-    // for(let j = 0; j < 5; j++) {
-    //     for(let i = 0; i < 300; i++) {
-    //         let a11 = (i / 300)     * Math.PI * 14;
-    //         let a12 = (i / 300)     * Math.PI * 2 + j * 0.1;
-    //         let a21 = ((i+1) / 300) * Math.PI * 14;
-    //         let a22 = ((i+1) / 300) * Math.PI * 2 + j * 0.1;
-
-    //         let r1 = 0; //Math.sin(i / 300 * Math.PI * 8)     * 0.8;
-    //         let r2 = 0; //Math.sin((i+1) / 300 * Math.PI * 8) * 0.8;
-
-    //         let v1 = new THREE.Vector3(0, 1 + r1, 0);
-    //         v1.applyAxisAngle(new THREE.Vector3(0,0,1), a11);
-    //         v1.add(new THREE.Vector3(-5,0,0));
-    //         v1.applyAxisAngle(new THREE.Vector3(0,1,0), a12);
-    //         v1.applyAxisAngle(new THREE.Vector3(1,0,0), -0.35);
-    //         v1.add(new THREE.Vector3(0,0, 8));
-
-
-    //         let v2 = new THREE.Vector3(0, 1 + r2, 0);
-    //         v2.applyAxisAngle(new THREE.Vector3(0,0,1), a21);
-    //         v2.add(new THREE.Vector3(-5,0,0));
-    //         v2.applyAxisAngle(new THREE.Vector3(0,1,0), a22);
-    //         v2.applyAxisAngle(new THREE.Vector3(1,0,0), -0.35);
-    //         v2.add(new THREE.Vector3(0,0, 8));
-
-    //         // let r = 0.03 + Math.sin(j * 0.3) * 0.15;
-    //         let r = 0.05;
-
-    //         let object  = new Line(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, r);
-    //         if(j === 3)
-    //             object.setColor(0.2 * 1, 0.5 * 1, 1 * 1);     
-
-    //         objects.push(object);
-    //     }
-    // }
-
-
-
-
-    for(let j = 0; j < trianglesCount; j++) {
-
-
-
-        let lx1 = Utils.rand() * 5 - 5 * 0.5; 
-        let ly1 = Utils.rand() * 5 - 5 * 0.5;
-        let lz1 = 10 + (Utils.rand() * 2.0 - 1.0) * 1.0;
-
-        let r = 0.05;
-        let z = Utils.rand() * 8;
-        
-        let lx2 = lx1 + (Utils.rand() * 2 - 1) * 0.5;
-        let ly2 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
-        let lz2 = lz1 + z;
-
-        let lx3 = lx1 + (Utils.rand() * 2 - 1) * 0.5; 
-        let ly3 = ly1 + (Utils.rand() * 2 - 1) * 0.5;
-        let lz3 = lz1 + z;
-
-        // let object  = new Triangle(lx1, ly1, lz1, lx2, ly2, lz2, lx3, ly3, lz3);
-        let object  = new Line(lx1, ly1, lz1, lx2, ly2, lz2, r);
-        // object.setColor(1, 0.4, 0.15);
-        
-        let res = Utils.hslToRgb(Utils.rand() * 1 + 0, 1, 0.7);
-        object.setColor(res[0], res[1], res[2]);        
-        object.setColor(2.5,2.5,2.5);        
-
-        if(Utils.rand() > 0.5) {
-            let grayValue = Math.pow(Math.random(), 1.0);
-            // object.setColor(0, grayValue * 0.3, grayValue);        
-            object.setColor(0.15 * 2, 0.4 * 2, 1 * 2);        
-        }
-
-
-
-    //     if(
-    //         // (j < 200 || j > 380) || 
-    //         (j == 12) ||
-    //         (j == 57)
-    //     ) {
-
-    //         if(j == 12) {
-    //             object.v0.x = object.v0.x;
-    //             object.v0.y = object.v0.y;
-    //             object.v0.z = object.v0.z;
-    //         }
-    //         if(j == 57) {
-    //             object.v0.x = object.v0.x;
-    //             object.v0.y = object.v0.y;
-    //             object.v0.z = object.v0.z;
-    //         }
-            objects.push(object);
-    //     }
-    }
- 
-    // geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(position), 3 ) );
-    // geometry.addAttribute( 'color',    new THREE.BufferAttribute( new Float32Array(color), 3 ) );
+    createMeshes(objects);
 
     let rootNode = makeBVH(objects);
 
     createTrianglesTexture(objects);
     createBVHTexture(rootNode, objects);
-
-    // function makeBVHGeometry(node, level) {
-
-    //     let aabb = node.aabb;
-    //     let xs = aabb.max.x - aabb.min.x;
-    //     let ys = aabb.max.y - aabb.min.y;
-    //     let zs = aabb.max.z - aabb.min.z;
-        
-    //     let geometry = new THREE.BoxBufferGeometry(xs, ys, zs);
-    
-    //     let meshColor             = 0xffffff;
-    //     if(level === 0) meshColor = 0xff5555;
-    //     if(node.leaf)   meshColor = 0x5555ff;
-
-    //     let mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
-    //         wireframe: true,
-    //         color: meshColor,
-    //         transparent: true,
-    //         opacity: 0.1 + level * 0.05
-    //     }));
-
-    //     mesh.position.set(
-    //         aabb.min.x + xs * 0.5,
-    //         aabb.min.y + ys * 0.5,
-    //         aabb.min.z + zs * 0.5,
-    //     );
-
-    //     scene.add(mesh);
-
-    //     if(node.child1) {
-    //         makeBVHGeometry(node.child1, level + 1);
-    //     }
-    //     if(node.child2) {
-    //         makeBVHGeometry(node.child2, level + 1);
-    //     }
-    // }
-    // makeBVHGeometry(rootNode, 0);
 }
 
 function createTrianglesTexture(objects) {
-    let vectorsPerTriangle = 5;
+    let vectorsPerTriangle = 6;
     let maxEntriesPerRow = Math.floor(dataTextureSize / vectorsPerTriangle);
     let maxNumberOfObjects = maxEntriesPerRow * dataTextureSize;
 
@@ -479,6 +237,11 @@ function createTrianglesTexture(objects) {
         data[ flat_index + 17 ] = 0; // should be uv3.t
         data[ flat_index + 18 ] = 0; // should be a flag telling if uv1-2 should be interpreted as a flat color
         data[ flat_index + 19 ] = 0;    
+
+        data[ flat_index + 20 ] = triangle.emission.x; // should be uv3.s    
+        data[ flat_index + 21 ] = triangle.emission.y; // should be uv3.t
+        data[ flat_index + 22 ] = triangle.emission.z; // should be a flag telling if uv1-2 should be interpreted as a flat color
+        data[ flat_index + 23 ] = 0;  
     }
     
     // used the buffer to create a DataTexture
@@ -857,10 +620,14 @@ class Triangle {
         this.textureDataIndexY = -1;
     
         this.color = new THREE.Vector3(1,1,1);
+        this.emission = new THREE.Vector3(0,0,0);
     }
 
     setColor(r,g,b) {
         this.color = new THREE.Vector3(r,g,b);
+    }
+    setEmission(r,g,b) {
+        this.emission = new THREE.Vector3(r,g,b);
     }
 
     intersect(ray) {
@@ -988,33 +755,37 @@ class Triangle {
 }
 
 class Line {
-    constructor(lx1, ly1, lz1, lx2, ly2, lz2, r) {
+    constructor(v1, v2, r) {
         this.aabb = new AABB();
         
-        this.v0 = new THREE.Vector3(lx1, ly1, lz1);
-        this.v1 = new THREE.Vector3(lx2, ly2, lz2);
+        this.v0 = v1.clone();
+        this.v1 = v2.clone();
         this.v2 = new THREE.Vector3(r, r, r);
 
         let m = 1;
-        this.aabb.addVertex(new THREE.Vector3(lx1 - r * m, ly1 - r * m, lz1 - r * m));
-        this.aabb.addVertex(new THREE.Vector3(lx1 + r * m, ly1 + r * m, lz1 + r * m));
-        this.aabb.addVertex(new THREE.Vector3(lx2 - r * m, ly2 - r * m, lz2 - r * m));
-        this.aabb.addVertex(new THREE.Vector3(lx2 + r * m, ly2 + r * m, lz2 + r * m));
+        this.aabb.addVertex(new THREE.Vector3(v1.x - r * m, v1.y - r * m, v1.z - r * m));
+        this.aabb.addVertex(new THREE.Vector3(v1.x + r * m, v1.y + r * m, v1.z + r * m));
+        this.aabb.addVertex(new THREE.Vector3(v2.x - r * m, v2.y - r * m, v2.z - r * m));
+        this.aabb.addVertex(new THREE.Vector3(v2.x + r * m, v2.y + r * m, v2.z + r * m));
         // this.aabb.addVertex(this.v2);
         
         this.center = new THREE.Vector3(
-            (lx1 + lx2) / 3,
-            (ly1 + ly2) / 3,
-            (lz1 + lz2) / 3,
+            (v1.x + v2.x) / 3,
+            (v1.y + v2.y) / 3,
+            (v1.z + v2.z) / 3,
         );
 
         this.textureDataIndexX = -1;
         this.textureDataIndexY = -1;
     
         this.color = new THREE.Vector3(1,1,1);
+        this.emission = new THREE.Vector3(0,0,0);
     }
 
     setColor(r,g,b) {
         this.color = new THREE.Vector3(r,g,b);
+    }
+    setEmission(r,g,b) {
+        this.emission = new THREE.Vector3(r,g,b);
     }
 }

@@ -1,6 +1,6 @@
 let shaderpart_bvhIntersection = `
 
-bool BVHintersect(vec3 ro, vec3 rd, inout float t, inout vec3 color, inout vec3 normal, inout float stepsTaken,
+bool BVHintersect(vec3 ro, vec3 rd, inout float t, inout vec3 color, inout vec3 emission, inout vec3 normal, inout float stepsTaken,
                   bool secondBounce, bool skip) {
 
     if(skip) return false;
@@ -169,6 +169,7 @@ bool BVHintersect(vec3 ro, vec3 rd, inout float t, inout vec3 color, inout vec3 
          
             if(intersects && it >= 0.0 && it < mint) {
                 color = texture2D(trianglesDataTexture, triangleDataPointer + pixelOffset * 3.0).xyz;
+                emission = texture2D(trianglesDataTexture, triangleDataPointer + pixelOffset * 5.0).xyz;
                 normal = _normal;
 
                 collisionDetected = true;

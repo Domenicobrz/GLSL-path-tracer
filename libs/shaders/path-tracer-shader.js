@@ -18,8 +18,9 @@ out vec4 out_FragColor;
 
 varying vec2 vUv;
 
-uniform vec4 uRandomVec4;
-uniform vec2 uScreenSize;
+uniform vec4  uRandomVec4;
+uniform vec4  uBokehParams;
+uniform vec2  uScreenSize;
 uniform float uDataTextureSize;
 uniform float uTime;
 
@@ -33,7 +34,6 @@ uniform sampler2D bvhDataTexture;
 ` + shaderpart_lineIntersection + `
 ` + shaderpart_aabbIntersection + `
 ` + shaderpart_bvhIntersection + `
-
 
 
 
@@ -69,9 +69,6 @@ void main() {
 
 
     // ********* dof
-    // as it's made currently, we're not focusing on a "focal plane"
-    // because rays are displaced in terms of a length from their direction
-    // so what we're doing is a DOF on a "curved plane" which is wrong obviously
     vec4 rand = uRandomVec4.xyzw;
     rand.x = n1rand( vec2(uRandomVec4.x + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
     rand.y = n1rand( vec2(uRandomVec4.y + vUv.x * 93.0 + vUv.y * 87.0, uTime) );
@@ -80,12 +77,12 @@ void main() {
 
     vec3 focalPoint = ro + (
         (rd * (1.0 / dot(rd, vec3(0,0,1.0)))   )
-     * 9.5);
+    * uBokehParams.y);
 
     float lambda = rand.x;
     float u      = rand.y * 2.0 - 1.0;
     float phi    = rand.z * 6.28;
-    float R      = 0.35;
+    float R      = uBokehParams.x;
 
     float x = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * cos(phi);
     float y = R * pow(lambda, 0.33333) * sqrt(1.0 - u * u) * sin(phi);
@@ -119,12 +116,13 @@ void main() {
     vec3 mask = vec3(1.0);
     vec3 accucolor = vec3(0.0);
     bool stop = false;
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 5; i++) {
         float stepsTaken = 0.0;
         float t = 0.0;
+        vec3 emission = vec3(0.0);
         vec3 color  = vec3(0.0);
         vec3 normal = vec3(0.0);
-        bool intersects = BVHintersect(ro, rd, t, color, normal, stepsTaken, false, stop);  
+        bool intersects = BVHintersect(ro, rd, t, color, emission, normal, stepsTaken, false, stop);  
 
         if(intersects) {
 
@@ -157,20 +155,28 @@ void main() {
             // ******************** random on unit sphere - END
 
             rd = normalize((hpn + randomOnUnitSphere) - ro);
+
+            accucolor += mask * emission;    
             mask *= color * dot(normal, rd);
 
         } else {
 
-            if(i > 0) accucolor = vec3(
-                pow(max(dot(rd, normalize(vec3(9.0, 1.0, 0.0))), 0.0), 16.0)
-            ) * 1000.0;
+            if(i > 0) {
+
+                // if(dot(rd, normalize(vec3(0.0, 10.0, -0.0))) > 0.95) {
+                //     accucolor += 500.0 * vec3(1.0);
+                // }
+              
+                accucolor += mask * vec3(
+                    pow(max(dot(rd, normalize(vec3(9.0, 1.0, -5.0))), 0.0), 11.0)
+                ) * 1200.0;    
+        
+            } 
 
             stop = true;
             break;
         }
     }
 
-
-    out_FragColor = vec4(accucolor * mask, 1.0);
-
+    out_FragColor = vec4(accucolor, 1.0);
 }`;
