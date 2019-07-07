@@ -1,4 +1,4 @@
-# Blurry
+# GLSL-path-tracer
 A simple glsl path tracer whose only primitives are.. capsules
 
 
